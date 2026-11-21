@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- AGP is intentionally kept one minor version behind the newest release,
+         so the project also opens in an Android Studio that is not the very latest. -->
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+</lint>
