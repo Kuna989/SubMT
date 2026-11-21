@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name" translatable="false">SubMT</string>
+    <string name="app_tagline">Your app for subscription management.</string>
+    <string name="app_logo_description">SubMT logo</string>
+</resources>
