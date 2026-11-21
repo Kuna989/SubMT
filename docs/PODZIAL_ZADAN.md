@@ -45,7 +45,7 @@ Tabela `subscriptions` (encja `SubscriptionEntity`, schemat: `app/schemas/`):
 | ✅ J1 | Szkielet projektu: Gradle (version catalog), struktura pakietów `data/domain/ui`, Hilt, `.gitignore`, motyw Material 3 (kolory, typografia, dark mode, dynamic color) | Architektura |
 | ✅ J2 | Nawigacja (Navigation Compose, NavHost, bottom bar / navigation rail dla dużych ekranów) | UI/UX, responsywność |
 | ✅ J3 | Baza danych Room: encja `Subscription`, DAO (Flow), migracje, `TypeConverter`y | Baza danych |
-| J4 | Warstwa domain: modele, `SubscriptionRepository`, use case'y (dodaj, edytuj, usuń, pobierz, wylicz następną płatność) | Architektura |
+| ✅ J4 | Warstwa domain: modele, `SubscriptionRepository`, use case'y (dodaj, edytuj, usuń, pobierz, wylicz następną płatność) | Architektura |
 | J5 | Ekran listy subskrypcji + suma miesięczna, wyszukiwanie/sortowanie, swipe-to-delete z cofnięciem (Snackbar „Cofnij”) | CRUD, UI |
 | J6 | Formularz dodawania/edycji z walidacją (nazwa, kwota > 0, data, cykl), komunikaty błędów pod polami | Walidacja |
 | J7 | Ekran szczegółów subskrypcji | CRUD |
@@ -67,6 +67,23 @@ Tabela `subscriptions` (encja `SubscriptionEntity`, schemat: `app/schemas/`):
 | B8 | Testy: jednostkowe dla przeliczania walut i statystyk (MockK, Turbine), testy UI Compose (formularz – walidacja, nawigacja, lista) | Testy |
 | B9 | Dostępność: `contentDescription`, kontrast, rozmiary celów dotykowych, sprawdzenie Accessibility Scannerem | Wymagania niefunkcjonalne |
 | B10 | Build release: podpisany APK, CI (GitHub Actions: build + testy) – opcjonalnie | Dokumentacja/APK |
+
+## Warstwa domain – z czego korzysta Bartek
+
+Wszystko jest wstrzykiwane przez Hilt (`@Inject constructor` w ViewModelu).
+
+| Potrzeba | Użyj |
+|---|---|
+| Lista subskrypcji (Flow) | `ObserveSubscriptionsUseCase(activeOnly = true)` |
+| Płatności w zakresie dat – kalendarz (B4), przypomnienia (B5) | `ObserveUpcomingPaymentsUseCase(from, to)` → `List<UpcomingPayment>` (data + subskrypcja), posortowane |
+| Następna płatność jednej subskrypcji | `subscription.nextPaymentDate(today)` |
+| Koszt miesięczny / roczny – statystyki (B3) | `subscription.monthlyCost`, `subscription.yearlyCost` (`Money` w walucie subskrypcji; przeliczenie na walutę bazową = B1) |
+| Jednorazowy odczyt w tle (WorkManager) | `SubscriptionRepository.getSubscriptions()` |
+| „Dzisiaj” | wstrzyknij `java.time.Clock` i użyj `LocalDate.now(clock)` – w testach `FIXED_CLOCK` |
+
+Kwoty są w groszach (`Money.amountMinor: Long`) – do wyświetlenia dzielimy przez 100 dopiero w UI. `Money` nie pozwala dodać różnych walut (wyjątek), więc sumy w statystykach trzeba liczyć po przeliczeniu kursem z B1.
+
+Do testów: `src/test/.../testing/FakeSubscriptionRepository.kt` (repozytorium w pamięci, `failWith` symuluje błąd bazy) i `TestData.kt` (`subscription(...)`, `FIXED_CLOCK`, `TODAY`).
 
 ## Gdzie Bartek wpina swoje ekrany
 
@@ -93,7 +110,7 @@ Wspólne komponenty: `ui/components/SubMtTopAppBar.kt` (pasek z opcjonalną strz
 | Dni | Jakub | Bartek |
 |---|---|---|
 | 21–22.11 | ✅ J1, ✅ J2, ✅ J3 (szkielet, nawigacja, Room) | B1 (API NBP – niezależny moduł), B6 (DataStore) |
-| 23–25.11 | J4 (najpierw interfejs repozytorium!), J5, J6 | B2 (błędy sieci), B5 (przypomnienia) |
+| 23–25.11 | ✅ J4, J5, J6 | B2 (błędy sieci), B5 (przypomnienia) |
 | 26–28.11 | J7, J8 (CSV) | B3 (statystyki), B4 (kalendarz) – na repozytorium z J4 |
 | 29.11–1.12 | J9 (testy jednostkowe) | B7 (biometria), B8 (testy UI), B9 (dostępność) |
 | **2.12** | **Feature freeze** – od tej chwili tylko poprawki błędów | |
