@@ -58,17 +58,21 @@ Zasada podziału: każdy odpowiada za odrębne moduły (pakiety), żeby ogranicz
 - Code review nawzajem – każdy PR zatwierdza druga osoba.
 - Przygotowanie prezentacji i obrony – każdy musi umieć wyjaśnić także część drugiej osoby.
 
-## Harmonogram (propozycja)
+## Harmonogram – 2 tygodnie (21.11 – 5.12.2026)
 
-| Etap | Jakub | Bartek |
+| Dni | Jakub | Bartek |
 |---|---|---|
-| Tydzień 1 | J1, J2, J3 (szkielet + baza) | B1 (API NBP, niezależny moduł), B6 (DataStore) |
-| Tydzień 2 | J4, J5, J6 | B3, B4 (na danych z repozytorium Jakuba) |
-| Tydzień 3 | J7, J8, J9 | B2, B5, B7 |
-| Tydzień 4 | J10, poprawki | B8, B9, B10 |
-| Tydzień 5 | Wspólnie: dokumentacja, screenshoty, APK, próba prezentacji | |
+| 21–22.11 | ✅ J1, J2, J3 (szkielet, nawigacja, Room) | B1 (API NBP – niezależny moduł), B6 (DataStore) |
+| 23–25.11 | J4 (najpierw interfejs repozytorium!), J5, J6 | B2 (błędy sieci), B5 (przypomnienia) |
+| 26–28.11 | J7, J8 (CSV) | B3 (statystyki), B4 (kalendarz) – na repozytorium z J4 |
+| 29.11–1.12 | J9 (testy jednostkowe) | B7 (biometria), B8 (testy UI), B9 (dostępność) |
+| **2.12** | **Feature freeze** – od tej chwili tylko poprawki błędów | |
+| 2–4.12 | J10 (diagramy, README) | B10 (podpisany APK) |
+| 4–5.12 | Wspólnie: zrzuty ekranu, opis testów, próba prezentacji | |
 
-**Zależność krytyczna:** Bartek zaczyna statystyki/kalendarz po zmergowaniu J1–J4 (szkielet, Room, repozytorium). Do tego czasu pracuje nad modułami niezależnymi (API NBP, DataStore).
+**Zależność krytyczna:** Bartek zaczyna statystyki i kalendarz po zmergowaniu J3–J4 (Room + repozytorium). Dlatego Jakub w J4 najpierw wypycha sam interfejs `SubscriptionRepository` i model domenowy – Bartek może od razu pisać na nim kod i testy (z fake'owym repozytorium). Do tego czasu Bartek robi moduły niezależne (API NBP, DataStore, przypomnienia).
+
+**Przy braku czasu wycinamy (w tej kolejności):** CI w GitHub Actions, `FLAG_SECURE`, wykres w statystykach (zostaje lista sum), wyszukiwanie na liście. Nie wycinamy niczego, co jest w kryteriach oceny (CRUD, walidacja, API, testy, dokumentacja).
 
 ## Zasady pracy z Gitem
 
