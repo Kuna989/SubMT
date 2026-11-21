@@ -1,5 +1,23 @@
 <resources>
     <string name="app_name" translatable="false">SubMT</string>
-    <string name="app_tagline">Your app for subscription management.</string>
-    <string name="app_logo_description">SubMT logo</string>
+
+    <!-- Navigation -->
+    <string name="nav_subscriptions">Subscriptions</string>
+    <string name="nav_calendar">Calendar</string>
+    <string name="nav_statistics">Statistics</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Actions -->
+    <string name="action_navigate_up">Navigate up</string>
+    <string name="action_add_subscription">Add subscription</string>
+    <string name="action_edit">Edit</string>
+
+    <!-- Screen titles -->
+    <string name="title_add_subscription">Add subscription</string>
+    <string name="title_edit_subscription">Edit subscription</string>
+    <string name="title_subscription_details">Subscription details</string>
+
+    <!-- Content -->
+    <string name="subscriptions_empty">No subscriptions yet.\nTap \"Add subscription\" to add your first one.</string>
+    <string name="placeholder_under_construction">This screen is under construction.</string>
 </resources>

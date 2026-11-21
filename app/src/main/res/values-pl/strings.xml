@@ -1,4 +1,21 @@
 <resources>
-    <string name="app_tagline">Twoja aplikacja do zarządzania subskrypcjami.</string>
-    <string name="app_logo_description">Logo SubMT</string>
+    <!-- Navigation -->
+    <string name="nav_subscriptions">Subskrypcje</string>
+    <string name="nav_calendar">Kalendarz</string>
+    <string name="nav_statistics">Statystyki</string>
+    <string name="nav_settings">Ustawienia</string>
+
+    <!-- Actions -->
+    <string name="action_navigate_up">Wstecz</string>
+    <string name="action_add_subscription">Dodaj subskrypcję</string>
+    <string name="action_edit">Edytuj</string>
+
+    <!-- Screen titles -->
+    <string name="title_add_subscription">Nowa subskrypcja</string>
+    <string name="title_edit_subscription">Edycja subskrypcji</string>
+    <string name="title_subscription_details">Szczegóły subskrypcji</string>
+
+    <!-- Content -->
+    <string name="subscriptions_empty">Nie masz jeszcze żadnych subskrypcji.\nDotknij „Dodaj subskrypcję”, aby dodać pierwszą.</string>
+    <string name="placeholder_under_construction">Ten ekran jest w trakcie budowy.</string>
 </resources>

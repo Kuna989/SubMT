@@ -1,70 +1,86 @@
 package pl.submt.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
-import pl.submt.R
-import pl.submt.ui.theme.SubMtTheme
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import pl.submt.ui.navigation.SubMtNavHost
+import pl.submt.ui.navigation.TopLevelDestination
 
 /**
- * Root composable of the app. For now a placeholder start screen;
- * the navigation graph (NavHost + bottom bar) replaces it in J2.
+ * Root composable: navigation bar (compact width) or navigation rail (medium / expanded
+ * width, e.g. tablets and landscape) around the navigation graph. The bar is hidden on
+ * nested screens such as the add/edit form.
  */
 @Composable
-fun SubMtApp(modifier: Modifier = Modifier) {
-    Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Autorenew,
-                contentDescription = stringResource(R.string.app_logo_description),
-                modifier = Modifier.size(72.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.app_tagline),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-        }
+fun SubMtApp(
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController(),
+) {
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStackEntry?.destination
+    val isTopLevel = TopLevelDestination.entries.any { currentDestination.isRoute(it) }
+
+    val layoutType = if (isTopLevel) {
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
+    } else {
+        NavigationSuiteType.None
+    }
+
+    NavigationSuiteScaffold(
+        modifier = modifier,
+        layoutType = layoutType,
+        navigationSuiteItems = {
+            TopLevelDestination.entries.forEach { destination ->
+                val selected = currentDestination.isInHierarchyOf(destination)
+                item(
+                    selected = selected,
+                    onClick = { navController.navigateToTopLevel(destination) },
+                    icon = {
+                        Icon(
+                            imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
+                            // The label below already describes the item for screen readers.
+                            contentDescription = null,
+                        )
+                    },
+                    label = { Text(stringResource(destination.labelRes)) },
+                )
+            }
+        },
+    ) {
+        SubMtNavHost(navController = navController)
     }
 }
 
-@PreviewLightDark
-@Composable
-private fun SubMtAppPreview() {
-    SubMtTheme {
-        SubMtApp()
+/**
+ * Switches tabs while keeping each tab's own back stack and scroll/UI state:
+ * pops up to the start destination (saving state) and restores the target tab's state.
+ */
+private fun NavHostController.navigateToTopLevel(destination: TopLevelDestination) {
+    navigate(destination.route) {
+        popUpTo(graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }
+
+private fun NavDestination?.isRoute(destination: TopLevelDestination): Boolean =
+    this?.hasRoute(destination.routeClass) == true
+
+private fun NavDestination?.isInHierarchyOf(destination: TopLevelDestination): Boolean =
+    this?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true
