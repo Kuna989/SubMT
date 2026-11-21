@@ -21,6 +21,9 @@ Autorzy: Jakub Łasiński, Bartłomiej Kieżun
 | Architektura | MVVM + warstwy data / domain / ui |
 | Wstrzykiwanie zależności | Hilt (KSP) |
 | Asynchroniczność | Kotlin Coroutines, Flow |
+| Baza danych | Room (SQLite), schematy w `app/schemas/` |
+| Nawigacja | Navigation Compose (type-safe routes), pasek nawigacji / rail zależnie od szerokości ekranu |
+| Testy | JUnit 4, Robolectric (Room i UI Compose na JVM), Compose UI Test |
 | Build | Gradle (Kotlin DSL) + version catalog (`gradle/libs.versions.toml`) |
 
 Konfiguracja: `minSdk 26` (Android 8.0), `targetSdk 37`, `compileSdk 37.2`, Java 17.
@@ -46,9 +49,13 @@ Z linii poleceń:
 ./gradlew test
 ```
 
+Testy jednostkowe, testy bazy danych i testy nawigacji (Robolectric) – nie wymagają emulatora.
+
 ```bash
 ./gradlew connectedAndroidTest
 ```
+
+Testy instrumentalne – wymagają uruchomionego emulatora lub podłączonego telefonu.
 
 APK debug: `app/build/outputs/apk/debug/app-debug.apk`.
 

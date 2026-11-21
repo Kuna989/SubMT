@@ -14,9 +14,27 @@ Zasada podziału: każdy odpowiada za odrębne moduły (pakiety), żeby ogranicz
 6. **Ustawienia** (waluta bazowa, przypomnienia, motyw, blokada) – B
 7. **Ekran blokady** (biometria / PIN) – B
 
-## Model danych (wstępnie)
+## Model danych
 
-`Subscription`: id, name, amount, currency, billingCycle (WEEKLY / MONTHLY / QUARTERLY / YEARLY), firstPaymentDate, nextPaymentDate, category, color, notes, reminderDaysBefore, isActive.
+Tabela `subscriptions` (encja `SubscriptionEntity`, schemat: `app/schemas/`):
+
+| Kolumna | Typ | Opis |
+|---|---|---|
+| `id` | INTEGER PK | autoinkrementacja |
+| `name` | TEXT | nazwa, np. „Netflix” |
+| `amount_minor` | INTEGER | kwota w groszach/centach (bez błędów zaokrągleń `Double`) |
+| `currency` | TEXT | kod ISO 4217: PLN, EUR, USD… |
+| `billing_cycle` | TEXT | WEEKLY / MONTHLY / QUARTERLY / YEARLY |
+| `first_payment_date` | INTEGER | data pierwszej płatności (epoch day) |
+| `category` | TEXT | STREAMING, MUSIC, SOFTWARE, GAMING, CLOUD, NEWS, FITNESS, EDUCATION, OTHER |
+| `reminder_days_before` | INTEGER NULL | ile dni przed płatnością przypomnieć; NULL = bez przypomnienia |
+| `notes` | TEXT NULL | notatki |
+| `is_active` | INTEGER | 1 = aktywna, 0 = anulowana |
+| `created_at` | INTEGER | data utworzenia (epoch millis) |
+
+**Następna płatność nie jest zapisywana w bazie** – liczy ją warstwa domain z `first_payment_date` i `billing_cycle` (J4). Dzięki temu nigdy się nie „przeterminuje”. Z tej samej funkcji korzystają kalendarz (B4), statystyki (B3) i przypomnienia (B5).
+
+**Dodawanie tabeli (np. cache kursów walut w B1):** nowa encja w `SubMtDatabase.entities`, `version` + 1, `autoMigrations = [AutoMigration(from = 1, to = 2)]`, a wygenerowany plik `app/schemas/.../2.json` commitujemy.
 
 ---
 
@@ -24,9 +42,9 @@ Zasada podziału: każdy odpowiada za odrębne moduły (pakiety), żeby ogranicz
 
 | # | Zadanie | Kryterium oceny |
 |---|---|---|
-| J1 | Szkielet projektu: Gradle (version catalog), struktura pakietów `data/domain/ui`, Hilt, `.gitignore`, motyw Material 3 (kolory, typografia, dark mode, dynamic color) | Architektura |
-| J2 | Nawigacja (Navigation Compose, NavHost, bottom bar / navigation rail dla dużych ekranów) | UI/UX, responsywność |
-| J3 | Baza danych Room: encja `Subscription`, DAO (Flow), migracje, `TypeConverter`y | Baza danych |
+| ✅ J1 | Szkielet projektu: Gradle (version catalog), struktura pakietów `data/domain/ui`, Hilt, `.gitignore`, motyw Material 3 (kolory, typografia, dark mode, dynamic color) | Architektura |
+| ✅ J2 | Nawigacja (Navigation Compose, NavHost, bottom bar / navigation rail dla dużych ekranów) | UI/UX, responsywność |
+| ✅ J3 | Baza danych Room: encja `Subscription`, DAO (Flow), migracje, `TypeConverter`y | Baza danych |
 | J4 | Warstwa domain: modele, `SubscriptionRepository`, use case'y (dodaj, edytuj, usuń, pobierz, wylicz następną płatność) | Architektura |
 | J5 | Ekran listy subskrypcji + suma miesięczna, wyszukiwanie/sortowanie, swipe-to-delete z cofnięciem (Snackbar „Cofnij”) | CRUD, UI |
 | J6 | Formularz dodawania/edycji z walidacją (nazwa, kwota > 0, data, cykl), komunikaty błędów pod polami | Walidacja |
@@ -50,6 +68,18 @@ Zasada podziału: każdy odpowiada za odrębne moduły (pakiety), żeby ogranicz
 | B9 | Dostępność: `contentDescription`, kontrast, rozmiary celów dotykowych, sprawdzenie Accessibility Scannerem | Wymagania niefunkcjonalne |
 | B10 | Build release: podpisany APK, CI (GitHub Actions: build + testy) – opcjonalnie | Dokumentacja/APK |
 
+## Gdzie Bartek wpina swoje ekrany
+
+Nawigacja jest gotowa – ekrany Bartka istnieją jako zaślepki, wystarczy zastąpić ich zawartość:
+
+| Zadanie | Plik |
+|---|---|
+| B3 Statystyki | `ui/statistics/StatisticsScreen.kt` |
+| B4 Kalendarz | `ui/calendar/CalendarScreen.kt` |
+| B6 Ustawienia | `ui/settings/SettingsScreen.kt` |
+
+Wspólne komponenty: `ui/components/SubMtTopAppBar.kt` (pasek z opcjonalną strzałką wstecz), `ui/components/PlaceholderContent.kt` (stan pusty). Nowy ekran = nowa trasa w `ui/navigation/Routes.kt` + wpis `composable<...>` w `SubMtNavHost.kt`.
+
 ## Zadania wspólne
 
 - Opis celu i zakresu, specyfikacja wymagań, diagram przypadków użycia.
@@ -62,7 +92,7 @@ Zasada podziału: każdy odpowiada za odrębne moduły (pakiety), żeby ogranicz
 
 | Dni | Jakub | Bartek |
 |---|---|---|
-| 21–22.11 | ✅ J1, J2, J3 (szkielet, nawigacja, Room) | B1 (API NBP – niezależny moduł), B6 (DataStore) |
+| 21–22.11 | ✅ J1, ✅ J2, ✅ J3 (szkielet, nawigacja, Room) | B1 (API NBP – niezależny moduł), B6 (DataStore) |
 | 23–25.11 | J4 (najpierw interfejs repozytorium!), J5, J6 | B2 (błędy sieci), B5 (przypomnienia) |
 | 26–28.11 | J7, J8 (CSV) | B3 (statystyki), B4 (kalendarz) – na repozytorium z J4 |
 | 29.11–1.12 | J9 (testy jednostkowe) | B7 (biometria), B8 (testy UI), B9 (dostępność) |
